@@ -112,12 +112,12 @@ class NFNet(tf.keras.Model):
         index = 0
         stride_pattern = [1, 2, 2, 2]
         block_args = zip(self.width_pattern, self.depth_pattern, self.bneck_pattern, self.group_pattern, self.big_pattern, stride_pattern)
-        for (block_width, stage_depth, expand_ratio, group_size, big_width, stride) in block_args:
+        for i, (block_width, stage_depth, expand_ratio, group_size, big_width, stride) in enumerate(block_args):
             for block_index in range(stage_depth):
                 beta = 1. / expected_std
                 block_stochdepth_rate = stochdepth_rate * index / num_blocks
                 out_ch = (int(block_width * self.width))
-                self.blocks += [NFBlock(ch, out_ch, expansion = expand_ratio, se_ratio = se_ratio, group_size = group_size, stride = stride if block_index == 0 else 1, beta = beta, alpha = alpha, activation = self.activation, which_conv = self.which_conv, stochdepth_rate = block_stochdepth_rate, big_width = big_width, use_two_convs = use_two_convs, )]
+                self.blocks += [NFBlock(ch, out_ch, expansion = expand_ratio, se_ratio = se_ratio, group_size = group_size, stride = stride if block_index == 0 else 1, beta = beta, alpha = alpha, activation = self.activation, which_conv = self.which_conv, stochdepth_rate = block_stochdepth_rate, big_width = big_width, use_two_convs = use_two_convs, name=f'{i}.{block_index}')]
                 ch = out_ch
                 index += 1
                 if block_index == 0: expected_std = 1.0

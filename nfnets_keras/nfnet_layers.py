@@ -35,8 +35,8 @@ class SqueezeExcite(tf.keras.Model):
             self.hidden_ch = hidden_ch
         else: self.hidden_ch = max(1, int(self.in_ch * se_ratio))
         self.activation = activation
-        self.fc0 = tf.keras.layers.Dense(self.hidden_ch, use_bias = True)
-        self.fc1 = tf.keras.layers.Dense(self.out_ch, use_bias = True)
+        self.fc0 = tf.keras.layers.Dense(self.hidden_ch, use_bias = True, name='fc0')
+        self.fc1 = tf.keras.layers.Dense(self.out_ch, use_bias = True, name='fc1')
 
     def call(self, x):
         h = tf.math.reduce_mean(x, axis = [1, 2])
