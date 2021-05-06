@@ -11,7 +11,7 @@ from keras.activations import sigmoid
 class WSConv2D(Conv2D):
     def __init__(self, *args, **kwargs):
         super(WSConv2D, self).__init__(kernel_initializer = "he_normal", *args, **kwargs)
-        with tf.variable_scope(self.name):
+        with tf.name_scope(self.name):
             self.gain = self.add_weight(name = 'gain', shape = (kwargs['filters'] if 'filters' in kwargs else args[0],), initializer = "ones", trainable = True, dtype = self.dtype)
 
     def standardize_weight(self, weight, eps):
