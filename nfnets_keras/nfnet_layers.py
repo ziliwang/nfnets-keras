@@ -11,13 +11,16 @@ from keras.activations import sigmoid
 class WSConv2D(Conv2D):
     def __init__(self, *args, **kwargs):
         super(WSConv2D, self).__init__(kernel_initializer = "he_normal", *args, **kwargs)
+    
+    def build(self, input_shape):
+        self.gain = self.add_weight(name = 'gain', shape = (self.filters), initializer = "ones", trainable = True, dtype = self.dtype)
 
     def standardize_weight(self, weight, eps):
         mean = tf.math.reduce_mean(weight, axis = (0, 1, 2), keepdims = True)
         var = tf.math.reduce_variance(weight, axis = (0, 1, 2), keepdims = True)
         fan_in = np.prod(weight.shape[:-1])
-        gain = self.add_weight(name = 'gain', shape = (weight.shape[-1],), initializer = "ones", trainable = True, dtype = self.dtype)
-        scale = tf.math.rsqrt(tf.math.maximum(var * fan_in, tf.convert_to_tensor(eps, dtype = self.dtype))) * gain
+
+        scale = tf.math.rsqrt(tf.math.maximum(var * fan_in, tf.convert_to_tensor(eps, dtype = self.dtype))) * self.gain
         return weight * scale - (mean * scale)
 
     def call(self, inputs, eps = 1e-4):
