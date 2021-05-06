@@ -199,6 +199,7 @@ class NFBlock(tf.keras.Model):
             out = self.stoch_depth(out, training)
         out = out * self.add_weight(name = 'skip_gain', shape = (), initializer = "zeros", trainable = True, dtype = out.dtype)
         return out * self.alpha + shortcut, res_avg_var
+        
 
 
 def NFNetF0(num_classes=None, width = 1.0, se_ratio = 0.5, alpha = 0.2, stochdepth_rate = 0.1, drop_rate = None, activation = 'gelu', fc_init = None, final_conv_mult = 2, final_conv_ch = None, use_two_convs = True, name = 'NFNet', include_top = True): return NFNet(num_classes=num_classes, variant = 'F0', width = width, se_ratio = se_ratio, alpha = alpha, stochdepth_rate = stochdepth_rate, drop_rate = drop_rate, activation = activation, fc_init = fc_init, final_conv_mult = final_conv_mult, final_conv_ch = final_conv_ch, use_two_convs = use_two_convs, name = name, include_top = include_top)
