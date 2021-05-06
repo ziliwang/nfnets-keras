@@ -117,7 +117,7 @@ class NFNet(tf.keras.Model):
                 beta = 1. / expected_std
                 block_stochdepth_rate = stochdepth_rate * index / num_blocks
                 out_ch = (int(block_width * self.width))
-                self.blocks += [NFBlock(ch, out_ch, expansion = expand_ratio, se_ratio = se_ratio, group_size = group_size, stride = stride if block_index == 0 else 1, beta = beta, alpha = alpha, activation = self.activation, which_conv = self.which_conv, stochdepth_rate = block_stochdepth_rate, big_width = big_width, use_two_convs = use_two_convs, name=f'{i}.{block_index}')]
+                self.blocks += [NFBlock(ch, out_ch, expansion = expand_ratio, se_ratio = se_ratio, group_size = group_size, stride = stride if block_index == 0 else 1, beta = beta, alpha = alpha, activation = self.activation, which_conv = self.which_conv, stochdepth_rate = block_stochdepth_rate, big_width = big_width, use_two_convs = use_two_convs, name=f'stages.{i}.{block_index}')]
                 ch = out_ch
                 index += 1
                 if block_index == 0: expected_std = 1.0
@@ -165,14 +165,14 @@ class NFBlock(tf.keras.Model):
         self.width = group_size * self.groups
         self.stride = stride
         self.use_two_convs = use_two_convs
-        self.conv0 = which_conv(filters = self.width, kernel_size = 1, padding = 'same', name = 'conv0')
-        self.conv1 = which_conv(filters = self.width, kernel_size = kernel_shape, strides = stride, padding = 'same', groups = self.groups, name = 'conv1')
+        self.conv0 = which_conv(filters = self.width, kernel_size = 1, padding = 'same', name = 'conv1')
+        self.conv1 = which_conv(filters = self.width, kernel_size = kernel_shape, strides = stride, padding = 'same', groups = self.groups, name = 'conv2')
         if self.use_two_convs:
-            self.conv1b = which_conv(filters = self.width, kernel_size = kernel_shape, strides = 1, padding = 'same', groups = self.groups, name = 'conv1b')
-        self.conv2 = which_conv(filters = self.out_ch, kernel_size = 1, padding = 'same', name = 'conv2')
+            self.conv1b = which_conv(filters = self.width, kernel_size = kernel_shape, strides = 1, padding = 'same', groups = self.groups, name = 'conv2b')
+        self.conv2 = which_conv(filters = self.out_ch, kernel_size = 1, padding = 'same', name = 'conv3')
         self.use_projection = stride > 1 or self.in_ch != self.out_ch
         if self.use_projection:
-            self.conv_shortcut = which_conv(filters = self.out_ch, kernel_size = 1, padding = 'same', name = 'conv_shortcut')
+            self.conv_shortcut = which_conv(filters = self.out_ch, kernel_size = 1, padding = 'same', name = 'downsample')
         self.se = SqueezeExcite(self.out_ch, self.out_ch, self.se_ratio)
         self._has_stochdepth = (stochdepth_rate is not None and stochdepth_rate > 0.0 and stochdepth_rate < 1.0)
         if self._has_stochdepth:
